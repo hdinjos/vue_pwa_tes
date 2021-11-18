@@ -1,19 +1,35 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <img alt="Vue logo" src="./assets/logo.png" />
+    <HelloWorld msg="Welcome to Your Vue.js App" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import HelloWorld from "./components/HelloWorld.vue";
+import { io } from "socket.io-client";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    HelloWorld,
+  },
+  mounted() {
+    const socketio = io(
+      `https://stepup.dev4.stechoq.com/api/member/notification`,
+      {
+        withCredentials: false,
+        extraHeaders: {
+          Authorization:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ4LCJyb2xlIjozLCJ0b2tlbiI6IlUyRnNkR1ZrWDEvN2NTVnloU1pHbnRIVmkzU0lhWlA5bXB5UGNwQ0RSaitXRHltRVFKdHZRQlM5UEdYRTZ3c0paNUxOemxmRnErdkRIS1NKUGRScDJySUlML2diM3hwWWZtTWs3cE84UGZUamlIWVpZd2p3YWdWS0VNRDh0RXNyTjJ0MUVoTWc1RUZUTEhvcUFEcmFWdz09IiwidGltZXN0YW1wIjoxNjM3MjA3NDYwMjkzLCJpYXQiOjE2MzcyMDc0NjAsImV4cCI6MTYzNzIzNjI2MH0.kmnEWwO_i9gu_83aQlKN3ZXXWuENfVpnJP0ayRRVAJc",
+        },
+      }
+    );
+    socketio.on("notification", (msg) => {
+      console.log("notif gas", msg);
+    });
+  },
+};
 </script>
 
 <style>
