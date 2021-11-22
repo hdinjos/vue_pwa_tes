@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <!-- <img alt="Vue logo" src="./assets/logo.png" />
+    <label>Actual</label
+    ><input v-model="actual" @change="changeActual" type="checkbox" />
+    <!-- <img alt="Vue logo" src="./assets/logo.png".target.value />
     <HelloWorld msg="Welcome to Your Vue.js App" /> -->
     <highcharts
       :constructorType="'ganttChart'"
@@ -159,20 +161,24 @@ console.log(series);
 export default {
   name: "App",
   data: () => ({
+    actual: false,
     dataTask: [
       {
+        id: 1,
         task: "design ui",
         name: "Ihsan",
-        start: Date.UTC(2021, 11, 18),
+        start: Date.UTC(2021, 11, 20),
         end: Date.UTC(2021, 11, 25),
       },
       {
+        id: 2,
         task: "listing account number",
         name: "Muham",
-        start: Date.UTC(2021, 11, 27),
-        end: Date.UTC(2021, 11, 29),
+        start: Date.UTC(2021, 11, 21),
+        end: Date.UTC(2021, 11, 28),
       },
       {
+        id: 3,
         task: "check detail user",
         name: "Taufik",
         start: Date.UTC(2021, 11, 20),
@@ -187,35 +193,93 @@ export default {
           const arr = [item, item];
           const waw = arr.map((ar, i) => {
             if (i % 2 === 1) {
-              return { ...ar, task: ar.task + " (actual)" };
+              return { ...ar, task: ar.task + " (actual)", color: "#F15C80" };
             } else {
-              return { ...ar, task: ar.task + " (planning)" };
+              return { ...ar, task: ar.task + " (planning)", color: "#8085E9" };
             }
           });
           return waw;
         })
         .flat();
     },
+    seriesData() {
+      return [
+        {
+          name: "",
+          data: this.dataTask,
+        },
+      ];
+    },
     chartOptions() {
       return {
-        // inverted: true,
         title: {
-          text: "Gantt Chart with Progress Indicators",
+          text: "Left Axis as Table",
         },
-        series: this.flatArray.map((item, i) => {
-          let nData = {
-            ...item,
-            names: item.task,
-            name: item.task,
-            y: i,
-          };
-          return {
-            data: [nData],
-            name: "",
-          };
-        }),
-        scrollbar: {
-          enabled: true,
+
+        xAxis: {
+          uniqueNames: true,
+          // tickPixelInterval: 70,
+        },
+
+        yAxis: {
+          type: "category",
+          grid: {
+            // events: {
+            //   click: () => {
+            //     console.log("hhhhh");
+            //   },
+            // },
+            enabled: true,
+            borderColor: "rgba(0,0,0,0.3)",
+            borderWidth: 1,
+            columns: [
+              {
+                title: {
+                  text: "Name",
+                },
+                labels: {
+                  format: "{point.name}",
+                },
+              },
+              {
+                title: {
+                  text: "Task",
+                },
+                labels: {
+                  format: "{point.task}",
+                },
+              },
+              // {
+              //   title: {
+              //     text: "Est. days",
+              //   },
+              //   labels: {
+              //     formatter: function () {
+              //       var point = this.point,
+              //         days = 1000 * 60 * 60 * 24,
+              //         number = (point.x2 - point.x) / days;
+              //       return Math.round(number * 100) / 100;
+              //     },
+              //   },
+              // },
+              // {
+              //   labels: {
+              //     format: "{point.start:%e. %b}",
+              //   },
+              //   title: {
+              //     text: "Start date",
+              //   },
+              // },
+              // {
+              //   title: {
+              //     text: "End date",
+              //   },
+              //   labels: {
+              //     format: "{point.end:%e. %b}",
+              //   },
+              // },
+            ],
+          },
         },
         navigator: {
           enabled: true,
@@ -228,62 +292,99 @@ export default {
           yAxis: {
             min: 0,
             max: 3,
-            // reversed: true,
-            // categories: [],
+            reversed: true,
+            categories: [],
           },
         },
-        // rangeSelector: {
-        //   enabled: true,
-        //   selected: 0,
-        // },
-        // tooltip: {
-        //   pointFormat:
-        //     "<span>Rented To: {point.rentedTo}</span><br/><span>From: {point.start:%e. %b}</span><br/><span>To: {point.end:%e. %b}</span>",
-        // },
-        xAxis: {
-          currentDateIndicator: true,
+        scrollbar: {
+          enabled: true,
         },
-        yAxis: {
-          type: "category",
-          uniqueNames: true,
-          grid: {
-            columns: [
-              {
-                title: {
-                  text: "Name",
-                },
-                categories: this.flatArray.map((item, i) => {
-                  if (i % 2 === 1) {
-                    return "";
-                  } else {
-                    return item.name;
-                  }
-                }),
+        rangeSelector: {
+          enabled: true,
+          selected: 0,
+        },
+
+        // tooltip: {
+        //   xDateFormat: "%e %b %Y, %H:%M",
+        // },
+
+        series: [
+          {
+            name: "",
+            // data: this.flatArray.map((item, i) => ({ ...item, y: i })),
+            data: this.actual
+              ? this.flatArray.map((item, i) => ({ ...item, y: i }))
+              : this.dataTask.map((item, i) => ({
+                  ...item,
+                  y: i,
+                  color: "#8085E9",
+                })),
+          },
+        ],
+        plotOptions: {
+          gantt: {
+            events: {
+              click: (e) => {
+                console.log(e.point);
               },
+            },
+            cursor: "pointer",
+          },
+          series: {
+            events: {
+              click: (point) => {
+                console.log("series", point);
+              },
+            },
+            dataLabels: [
               {
-                title: {
-                  text: "Task",
+                style: {
+                  cursor: "pointer",
                 },
-                categories: this.flatArray.map((item, i) => {
-                  if (i % 2 === 1) {
-                    return "";
-                  } else {
-                    return item.task;
-                  }
-                }),
               },
             ],
+            // point: {
+            //   events: {
+            //     click: (point) => {
+            //       console.log("series", point);
+            //     },
+            //   },
+            // },
           },
         },
+
+        // exporting: {
+        //   sourceWidth: 1000,
+        // },
       };
+    },
+  },
+  watch: {
+    // actual(val) {
+    //   this.actual = val;
+    //   localStorage.setItem("actualTask", val);
+    //   window.location.reload();
+    // },
+  },
+  methods: {
+    async changeActual() {
+      localStorage.setItem("actualTask", this.actual);
+      window.location.reload();
     },
   },
   components: {
     // highcharts: HighchartsVue,
     // HelloWorld,
   },
-  mounted() {
-    console.log(this.chartOptions.series);
+  created() {
+    const actual = localStorage.getItem("actualTask");
+    if (actual === "true") {
+      this.actual = true;
+    } else {
+      this.actual = false;
+    }
+    // this.actual = actual;
+    // console.log(this.chartOptions.series);
     // const socketio = io(
     //   `https://stepup.dev4.stechoq.com/api/member/notification`,
     //   {
